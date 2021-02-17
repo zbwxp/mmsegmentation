@@ -1,5 +1,5 @@
 # model settings
-norm_cfg = dict(type='BN', requires_grad=True) #default SyncBn
+norm_cfg = dict(type='BN', requires_grad=True)  # default 'SyncBN'
 model = dict(
     type='EncoderDecoder',
     pretrained='open-mmlab://resnet50_v1c',
@@ -8,20 +8,24 @@ model = dict(
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
-        dilations=(1, 1, 2, 4),
-        strides=(1, 2, 1, 1),
+        dilations=(1, 1, 1, 1),
+        strides=(1, 2, 2, 2),
         norm_cfg=norm_cfg,
         norm_eval=False,
         style='pytorch',
         contract_dilation=True),
     decode_head=dict(
-        type='DepthwiseSeparableASPPHead',
-        in_channels=2048,
-        in_index=3,
-        channels=512,
-        dilations=(1, 12, 24, 36),
-        c1_in_channels=256,
-        c1_channels=48,
+        type='DynConvHead',
+        upsample_factor=8,
+        dyn_branch_ch=8,
+        mask_head_ch=8,
+        use_low_level_info=True,
+        low_level_stages=(0, 1, 2),  # starts from stage_2
+        tower_ch=48,
+        in_channels=(256, 512, 1024, 2048),
+        input_transform='multiple_select',
+        in_index=(0, 1, 2, 3),
+        channels=512,  # channels to cls 1x1 conv "self.conv_seg"
         dropout_ratio=0.1,
         num_classes=19,
         norm_cfg=norm_cfg,
