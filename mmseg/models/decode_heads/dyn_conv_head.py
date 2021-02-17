@@ -73,6 +73,7 @@ class DynConvHead(BaseDecodeHead):
                  use_low_level_info,
                  low_level_stages=(0,),
                  tower_ch=0,
+                 sem_loss_on=False,
                  **kwargs):
         super(DynConvHead, self).__init__(**kwargs)
         self.upsample_f = upsample_factor
@@ -81,6 +82,7 @@ class DynConvHead(BaseDecodeHead):
         self.use_low_level_info = use_low_level_info
         self.low_level_stages = low_level_stages
         self.tower_channel = tower_ch
+        self.sem_loss_on = sem_loss_on
         last_stage_ch = self.in_channels[-1]
         self.classifier = DynHead(last_stage_ch,
                                   self.num_classes,
@@ -104,8 +106,8 @@ class DynConvHead(BaseDecodeHead):
                         norm_cfg=self.norm_cfg,
                         act_cfg=self.act_cfg))
 
-            self.tower = nn.Conv2d(self.tower_channel, self.dyn_ch, 1, padding=0, bias=False)
-            _, norm = build_norm_layer(self.norm_cfg, 2 + self.dyn_ch)
+            self.tower = nn.Conv2d(self.tower_channel, self.mask_ch, 1, padding=0, bias=False)
+            _, norm = build_norm_layer(self.norm_cfg, 2 + self.mask_ch)
             self.add_module("cat_norm", norm)
             nn.init.kaiming_normal_(self.tower.weight)
             nn.init.constant_(self.cat_norm.weight, 1)
@@ -133,14 +135,19 @@ class DynConvHead(BaseDecodeHead):
                              scale_factor=factor,
                              mode='bilinear',
                              align_corners=self.align_corners)
+            output = self.interpolate(x, x_tower, self.cat_norm)
         else:
-            x_tower = None
+            output = self.interpolate(x)
 
-        output = self.interpolate(x, x_tower, self.cat_norm)
+        if self.use_low_level_info and self.sem_loss_on:
+            outputs=[]
+            outputs.append(output)
+            outputs.append(x_cat)
+            return outputs
 
         return output
 
-    def interpolate(self, x, x_cat, norm=None):
+    def interpolate(self, x, x_cat=None, norm=None):
         dy_ch = self.dyn_ch
         B, conv_ch, H, W = x.size()
         x = x.view(B, conv_ch, H * W).permute(0, 2, 1)

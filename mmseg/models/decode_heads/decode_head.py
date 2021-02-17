@@ -5,10 +5,11 @@ import torch.nn as nn
 from mmcv.cnn import normal_init
 from mmcv.runner import auto_fp16, force_fp32
 
-from mmseg.core import build_pixel_sampler
+from mmseg.core import build_pixel_sampler, add_prefix
 from mmseg.ops import resize
 from ..builder import build_loss
 from ..losses import accuracy
+
 
 
 class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
@@ -184,7 +185,14 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
             dict[str, Tensor]: a dictionary of loss components
         """
         seg_logits = self.forward(inputs)
-        losses = self.losses(seg_logits, gt_semantic_seg)
+        if isinstance(seg_logits, list):
+            losses = dict()
+            loss1 = self.losses(seg_logits[0], gt_semantic_seg)
+            losses.update(add_prefix(loss1, 'main'))
+            loss2 = self.losses(seg_logits[1], gt_semantic_seg)
+            losses.update(add_prefix(loss2, 'sem'))
+        else:
+            losses = self.losses(seg_logits, gt_semantic_seg)
         return losses
 
     def forward_test(self, inputs, img_metas, test_cfg):

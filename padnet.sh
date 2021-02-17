@@ -14,4 +14,4 @@
 source /hpcfs/users/a1652385/apps/anaconda3/bin/activate
 conda activate torch1.1
 
-bash ./tools/dist_train.sh  ./configs/padnet/padnet_r50_512x1024_40k_cityscapes.py  ./work_dirs/padnet_city
+bash ./tools/dist_train.sh  ./configs/padnet/padnet_r50_512x1024_40k_cityscapes_sem_loss_on.py  ./work_dirs/padnet_city
