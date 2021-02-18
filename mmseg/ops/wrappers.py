@@ -11,8 +11,6 @@ def resize(input,
            mode='nearest',
            align_corners=None,
            warning=True):
-    if isinstance(input, list):
-        input = input[0]
     if warning:
         if size is not None and align_corners:
             input_h, input_w = tuple(int(x) for x in input.shape[2:])
