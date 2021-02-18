@@ -75,6 +75,7 @@ class DynConvHead(BaseDecodeHead):
                  tower_ch=0,
                  sem_loss_on=False,
                  use_aligned_bilinear=False,
+                 tower_num_convs=0,
                  **kwargs):
         super(DynConvHead, self).__init__(**kwargs)
         self.upsample_f = upsample_factor
@@ -85,6 +86,7 @@ class DynConvHead(BaseDecodeHead):
         self.tower_channel = tower_ch
         self.sem_loss_on = sem_loss_on
         self.use_aligned_bilinear = use_aligned_bilinear
+        self.tower_num_convs = tower_num_convs
 
         last_stage_ch = self.in_channels[-1]
         self.classifier = DynHead(last_stage_ch,
@@ -109,10 +111,22 @@ class DynConvHead(BaseDecodeHead):
                         norm_cfg=self.norm_cfg,
                         act_cfg=self.act_cfg))
 
-            self.tower = nn.Conv2d(self.tower_channel, self.mask_ch, 1, padding=0, bias=False)
+            tower = []
+            for i in range(self.tower_num_convs):
+                tower.append(ConvModule(
+                        self.tower_channel,
+                        self.tower_channel,
+                        3,
+                        padding=1,
+                        norm_cfg=self.norm_cfg,
+                        act_cfg=self.act_cfg))
+            tower.append(nn.Conv2d(self.tower_channel, self.mask_ch, 1, padding=0, bias=False))
+            self.add_module('tower', nn.Sequential(*tower))
+
+
             _, norm = build_norm_layer(self.norm_cfg, 2 + self.mask_ch)
             self.add_module("cat_norm", norm)
-            nn.init.kaiming_normal_(self.tower.weight)
+            nn.init.kaiming_normal_(self.tower[-1].weight)
             nn.init.constant_(self.cat_norm.weight, 1)
             nn.init.constant_(self.cat_norm.bias, 0)
 
