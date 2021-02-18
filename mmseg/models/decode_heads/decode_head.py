@@ -6,7 +6,7 @@ from mmcv.cnn import normal_init
 from mmcv.runner import auto_fp16, force_fp32
 
 from mmseg.core import build_pixel_sampler, add_prefix
-from mmseg.ops import resize
+from mmseg.ops import resize, aligned_bilinear
 from ..builder import build_loss
 from ..losses import accuracy
 
@@ -223,16 +223,26 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
     def losses(self, seg_logit, seg_label):
         """Compute segmentation loss."""
         loss = dict()
-        seg_logit = resize(
-            input=seg_logit,
-            size=seg_label.shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+        if self.use_aligned_bilinear:
+            target_h, target_w = seg_label.shape[2:]
+            h, w = seg_logit.size()[2:]
+            assert target_h % h == 0
+            assert target_w % w == 0
+            factor_h, factor_w = target_h // h, target_w // w
+            assert factor_h == factor_w
+            seg_logit = aligned_bilinear(seg_logit, factor_h)
+        else:
+            seg_logit = resize(
+                input=seg_logit,
+                size=seg_label.shape[2:],
+                mode='bilinear',
+                align_corners=self.align_corners)
         if self.sampler is not None:
             seg_weight = self.sampler.sample(seg_logit, seg_label)
         else:
             seg_weight = None
         seg_label = seg_label.squeeze(1)
+
         loss['loss_seg'] = self.loss_decode(
             seg_logit,
             seg_label,

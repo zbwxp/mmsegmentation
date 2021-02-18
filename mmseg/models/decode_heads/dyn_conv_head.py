@@ -110,6 +110,17 @@ class DynConvHead(BaseDecodeHead):
                         padding=1,
                         norm_cfg=self.norm_cfg,
                         act_cfg=self.act_cfg))
+            if self.sem_loss_on:
+                self.sem_loss = nn.Sequential(
+                        ConvModule(
+                        self.tower_channel,
+                        self.tower_channel,
+                        3,
+                        padding=1,
+                        norm_cfg=self.norm_cfg,
+                        act_cfg=self.act_cfg),
+                        nn.Conv2d(self.tower_channel, self.num_classes, 1, padding=0, bias=False))
+                nn.init.kaiming_normal_(self.sem_loss[-1].weight)
 
             tower = []
             for i in range(self.tower_num_convs):
@@ -173,6 +184,7 @@ class DynConvHead(BaseDecodeHead):
         if self.use_low_level_info and self.sem_loss_on:
             outputs=[]
             outputs.append(output)
+            x_cat = self.sem_loss(x_cat)
             outputs.append(x_cat)
             return outputs
 
