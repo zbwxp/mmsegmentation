@@ -28,6 +28,29 @@ def resize(input,
         size = tuple(int(x) for x in size)
     return F.interpolate(input, size, scale_factor, mode, align_corners)
 
+def aligned_bilinear(tensor, factor):
+    assert tensor.dim() == 4
+    assert factor >= 1
+    assert int(factor) == factor
+
+    if factor == 1:
+        return tensor
+
+    h, w = tensor.size()[2:]
+    tensor = F.pad(tensor, pad=(0, 1, 0, 1), mode="replicate")
+    oh = factor * h + 1
+    ow = factor * w + 1
+    tensor = F.interpolate(
+        tensor, size=(oh, ow),
+        mode='bilinear',
+        align_corners=True
+    )
+    tensor = F.pad(
+        tensor, pad=(factor // 2, 0, factor // 2, 0),
+        mode="replicate"
+    )
+
+    return tensor[:, :, :oh - 1, :ow - 1]
 
 class Upsample(nn.Module):
 
@@ -51,3 +74,4 @@ class Upsample(nn.Module):
         else:
             size = self.size
         return resize(x, size, None, self.mode, self.align_corners)
+

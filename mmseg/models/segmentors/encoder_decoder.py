@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmseg.core import add_prefix
-from mmseg.ops import resize
+from mmseg.ops import resize, aligned_bilinear
 from .. import builder
 from ..builder import SEGMENTORS
 from .base import BaseSegmentor
@@ -25,7 +25,8 @@ class EncoderDecoder(BaseSegmentor):
                  auxiliary_head=None,
                  train_cfg=None,
                  test_cfg=None,
-                 pretrained=None):
+                 pretrained=None,
+                 use_aligned_bilinear=False):
         super(EncoderDecoder, self).__init__()
         self.backbone = builder.build_backbone(backbone)
         if neck is not None:
@@ -36,6 +37,7 @@ class EncoderDecoder(BaseSegmentor):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
 
+        self.use_aligned_bilinear = use_aligned_bilinear
         self.init_weights(pretrained=pretrained)
 
         assert self.with_decode_head
@@ -88,11 +90,21 @@ class EncoderDecoder(BaseSegmentor):
         out = self._decode_head_forward_test(x, img_metas)
         if isinstance(out, list):
             out = out[0]
-        out = resize(
-            input=out,
-            size=img.shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+
+        if self.use_aligned_bilinear:
+            target_h, target_w = img.shape[2:]
+            h, w = out.size()[2:]
+            assert target_h % h == 0
+            assert target_w % w == 0
+            factor_h, factor_w = target_h // h, target_w // w
+            assert factor_h == factor_w
+            out = aligned_bilinear(out, factor_h)
+        else:
+            out = resize(
+                input=out,
+                size=img.shape[2:],
+                mode='bilinear',
+                align_corners=self.align_corners)
         return out
 
     def _decode_head_forward_train(self, x, img_metas, gt_semantic_seg):
@@ -205,12 +217,21 @@ class EncoderDecoder(BaseSegmentor):
                 count_mat.cpu().detach().numpy()).to(device=img.device)
         preds = preds / count_mat
         if rescale:
-            preds = resize(
-                preds,
-                size=img_meta[0]['ori_shape'][:2],
-                mode='bilinear',
-                align_corners=self.align_corners,
-                warning=False)
+            if self.use_aligned_bilinear:
+                target_h, target_w = img_meta[0]['ori_shape'][:2]
+                h, w = preds.size()[2:]
+                assert target_h % h == 0
+                assert target_w % w == 0
+                factor_h, factor_w = target_h // h, target_w // w
+                assert factor_h == factor_w
+                preds = aligned_bilinear(preds, factor_h)
+            else:
+                preds = resize(
+                    preds,
+                    size=img_meta[0]['ori_shape'][:2],
+                    mode='bilinear',
+                    align_corners=self.align_corners,
+                    warning=False)
         return preds
 
     def whole_inference(self, img, img_meta, rescale):
@@ -218,12 +239,21 @@ class EncoderDecoder(BaseSegmentor):
 
         seg_logit = self.encode_decode(img, img_meta)
         if rescale:
-            seg_logit = resize(
-                seg_logit,
-                size=img_meta[0]['ori_shape'][:2],
-                mode='bilinear',
-                align_corners=self.align_corners,
-                warning=False)
+            if self.use_aligned_bilinear:
+                target_h, target_w = img_meta[0]['ori_shape'][:2]
+                h, w = seg_logit.size()[2:]
+                assert target_h % h == 0
+                assert target_w % w == 0
+                factor_h, factor_w = target_h // h, target_w // w
+                assert factor_h == factor_w
+                seg_logit = aligned_bilinear(seg_logit, factor_h)
+            else:
+                seg_logit = resize(
+                    seg_logit,
+                    size=img_meta[0]['ori_shape'][:2],
+                    mode='bilinear',
+                    align_corners=self.align_corners,
+                    warning=False)
 
         return seg_logit
 

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmcv.cnn.bricks import build_norm_layer
 
-from mmseg.ops import resize
+from mmseg.ops import resize, aligned_bilinear
 from ..builder import HEADS
 from .aspp_head import ASPPHead, ASPPModule
 from .decode_head import BaseDecodeHead
@@ -74,6 +74,7 @@ class DynConvHead(BaseDecodeHead):
                  low_level_stages=(0,),
                  tower_ch=0,
                  sem_loss_on=False,
+                 use_aligned_bilinear=False,
                  **kwargs):
         super(DynConvHead, self).__init__(**kwargs)
         self.upsample_f = upsample_factor
@@ -83,6 +84,8 @@ class DynConvHead(BaseDecodeHead):
         self.low_level_stages = low_level_stages
         self.tower_channel = tower_ch
         self.sem_loss_on = sem_loss_on
+        self.use_aligned_bilinear = use_aligned_bilinear
+
         last_stage_ch = self.in_channels[-1]
         self.classifier = DynHead(last_stage_ch,
                                   self.num_classes,
@@ -123,18 +126,32 @@ class DynConvHead(BaseDecodeHead):
                     x_cat = self.low_level[i](features[stage])
                 else:
                     x_catp = self.low_level[i](features[stage])
-                    x_catp = resize(x_catp,
-                                    size=x_cat.size()[2:],
-                                    mode='bilinear',
-                                    align_corners=self.align_corners)
+
+                    if self.use_aligned_bilinear:
+                        target_h, target_w = x_cat.size()[2:]
+                        h, w = x_catp.size()[2:]
+                        assert target_h % h == 0
+                        assert target_w % w == 0
+                        factor_h, factor_w = target_h // h, target_w // w
+                        assert factor_h == factor_w
+                        x_catp = aligned_bilinear(x_catp, factor_h)
+                    else:
+                        x_catp = resize(x_catp,
+                                        size=x_cat.size()[2:],
+                                        mode='bilinear',
+                                        align_corners=self.align_corners)
                     x_cat = x_cat + x_catp
 
             x_tower = self.tower(x_cat)
             factor = self.upsample_f // 8
-            x_tower = resize(x_tower,
-                             scale_factor=factor,
-                             mode='bilinear',
-                             align_corners=self.align_corners)
+
+            if self.use_aligned_bilinear:
+                x_tower = aligned_bilinear(x_tower, factor)
+            else:
+                x_tower = resize(x_tower,
+                                 scale_factor=factor,
+                                 mode='bilinear',
+                                 align_corners=self.align_corners)
             output = self.interpolate(x, x_tower, self.cat_norm)
         else:
             output = self.interpolate(x)
