@@ -223,7 +223,7 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
     def losses(self, seg_logit, seg_label):
         """Compute segmentation loss."""
         loss = dict()
-        if self.use_aligned_bilinear:
+        if hasattr(self, 'use_aligned_bilinear') and self.use_aligned_bilinear:
             target_h, target_w = seg_label.shape[2:]
             h, w = seg_logit.size()[2:]
             assert target_h % h == 0

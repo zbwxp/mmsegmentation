@@ -91,7 +91,7 @@ class EncoderDecoder(BaseSegmentor):
         if isinstance(out, list):
             out = out[0]
 
-        if self.use_aligned_bilinear:
+        if hasattr(self, 'use_aligned_bilinear') and self.use_aligned_bilinear:
             target_h, target_w = img.shape[2:]
             h, w = out.size()[2:]
             assert target_h % h == 0
@@ -217,7 +217,7 @@ class EncoderDecoder(BaseSegmentor):
                 count_mat.cpu().detach().numpy()).to(device=img.device)
         preds = preds / count_mat
         if rescale:
-            if self.use_aligned_bilinear:
+            if hasattr(self, 'use_aligned_bilinear') and self.use_aligned_bilinear:
                 target_h, target_w = img_meta[0]['ori_shape'][:2]
                 h, w = preds.size()[2:]
                 assert target_h % h == 0
@@ -239,7 +239,7 @@ class EncoderDecoder(BaseSegmentor):
 
         seg_logit = self.encode_decode(img, img_meta)
         if rescale:
-            if self.use_aligned_bilinear:
+            if hasattr(self, 'use_aligned_bilinear') and self.use_aligned_bilinear:
                 target_h, target_w = img_meta[0]['ori_shape'][:2]
                 h, w = seg_logit.size()[2:]
                 assert target_h % h == 0
