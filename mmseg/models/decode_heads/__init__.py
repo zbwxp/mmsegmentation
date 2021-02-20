@@ -21,10 +21,11 @@ from .sep_fcn_head import DepthwiseSeparableFCNHead
 from .uper_head import UPerHead
 from .dyn_conv_head import DynConvHead
 from .dyn_ppm_head import DynPPMHead
+from .deeppad_head import DeepPadHead
 
 __all__ = [
     'FCNHead', 'PSPHead', 'ASPPHead', 'NLHead', 'GCHead', 'CCHead',
     'UPerHead', 'DepthwiseSeparableASPPHead', 'ANNHead', 'DAHead', 'OCRHead',
     'EncHead', 'DepthwiseSeparableFCNHead', 'FPNHead', 'EMAHead', 'DNLHead',
-    'APCHead', 'DMHead', 'LRASPPHead', 'DynConvHead', 'DynPPMHead'
+    'APCHead', 'DMHead', 'LRASPPHead', 'DynConvHead', 'DynPPMHead', 'DeepPadHead'
 ]
