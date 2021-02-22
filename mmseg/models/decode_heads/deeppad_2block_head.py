@@ -26,7 +26,7 @@ class DepthwiseSeparableASPPModule(ASPPModule):
                     norm_cfg=self.norm_cfg,
                     act_cfg=self.act_cfg)
 
-class DynHead(nn.Module):
+class DynHead_2block(nn.Module):
     def __init__(self,
                  in_channels,
                  num_classes,
@@ -36,15 +36,14 @@ class DynHead(nn.Module):
                  dyn_ch,
                  mask_ch,
                  use_low_level_info=False):
-        super(DynHead, self).__init__()
+        super(DynHead_2block, self).__init__()
 
         channels = dyn_ch
         num_bases = 0
         if use_low_level_info:
             num_bases = mask_ch
+        # remove one block
         num_out_channel = (2 + num_bases) * channels + \
-                          channels + \
-                          channels * channels + \
                           channels + \
                           channels * num_classes + \
                           num_classes
@@ -67,7 +66,7 @@ class DynHead(nn.Module):
         return self.classifier(feature)
 
 @HEADS.register_module()
-class DeepPadHead(ASPPHead):
+class DeepPad2BlockHead(ASPPHead):
     """Encoder-Decoder with Atrous Separable Convolution for Semantic Image
     Segmentation.
 
@@ -86,7 +85,7 @@ class DeepPadHead(ASPPHead):
                  mask_head_ch,
                  pad_out_channel_factor=4,
                  **kwargs):
-        super(DeepPadHead, self).__init__(**kwargs)
+        super(DeepPad2BlockHead, self).__init__(**kwargs)
         assert c1_in_channels >= 0
         self.pad_out_channel = pad_out_channel_factor*c1_channels
         self.upsample_f = upsample_factor
@@ -102,7 +101,7 @@ class DeepPadHead(ASPPHead):
             act_cfg=self.act_cfg)
 
         last_stage_ch = self.channels
-        self.classifier = DynHead(last_stage_ch,
+        self.classifier = DynHead_2block(last_stage_ch,
                                   self.pad_out_channel,
                                   self.norm_cfg,
                                   self.act_cfg,
@@ -200,21 +199,24 @@ class DeepPadHead(ASPPHead):
         else:
             num_bases = 0
 
-        w0, b0, w1, b1, w2, b2 = torch.split_with_sizes(attns, [
+        # w0, b0, w1, b1, w2, b2 = torch.split_with_sizes(attns, [
+        #     (2 + num_bases) * channels, channels,
+        #     channels * channels, channels,
+        #     channels * self.pad_out_channel, self.pad_out_channel
+        # ], dim=1)
+
+        w0, b0, w1, b1 = torch.split_with_sizes(attns, [
             (2 + num_bases) * channels, channels,
-            channels * channels, channels,
             channels * self.pad_out_channel, self.pad_out_channel
         ], dim=1)
 
         # out_channels x in_channels x 1 x 1
         w0 = w0.reshape(n_inst * channels, 2 + num_bases, 1, 1)
         b0 = b0.reshape(n_inst * channels)
-        w1 = w1.reshape(n_inst * channels, channels, 1, 1)
-        b1 = b1.reshape(n_inst * channels)
-        w2 = w2.reshape(n_inst * self.pad_out_channel, channels, 1, 1)
-        b2 = b2.reshape(n_inst * self.pad_out_channel)
+        w1 = w1.reshape(n_inst * self.pad_out_channel, channels, 1, 1)
+        b1 = b1.reshape(n_inst * self.pad_out_channel)
 
-        return [w0, w1, w2], [b0, b1, b2]
+        return [w0, w1], [b0, b1]
 
     def subnetworks_forward(self, inputs, weights, biases, n_subnets):
         assert inputs.dim() == 4
