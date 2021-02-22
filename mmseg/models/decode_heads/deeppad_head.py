@@ -51,17 +51,17 @@ class DynHead(nn.Module):
 
         self.classifier = nn.Sequential(
             # ASPP(in_channels, aspp_dilate),
-            ConvModule(
-                in_channels,
-                256,
-                3,
-                padding=1,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg, ),
-            nn.Conv2d(256, num_out_channel, 1)
+            # ConvModule(
+            #     in_channels,
+            #     256,
+            #     3,
+            #     padding=1,
+            #     norm_cfg=norm_cfg,
+            #     act_cfg=act_cfg, ),
+            nn.Conv2d(in_channels, num_out_channel, 1)
         )
 
-        nn.init.kaiming_normal_(self.classifier[1].weight)
+        nn.init.kaiming_normal_(self.classifier[-1].weight)
 
     def forward(self, feature):
         return self.classifier(feature)
