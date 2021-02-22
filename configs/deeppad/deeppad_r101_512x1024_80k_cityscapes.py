@@ -5,5 +5,6 @@ model = dict(
     decode_head=dict(
         dyn_branch_ch=16,
         mask_head_ch=16,
+        pad_out_channel_factor=2,
     ),
 )

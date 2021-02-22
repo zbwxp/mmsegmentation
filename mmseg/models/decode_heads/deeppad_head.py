@@ -84,10 +84,11 @@ class DeepPadHead(ASPPHead):
                  upsample_factor,
                  dyn_branch_ch,
                  mask_head_ch,
+                 pad_out_channel_factor=4,
                  **kwargs):
         super(DeepPadHead, self).__init__(**kwargs)
         assert c1_in_channels >= 0
-        self.pad_out_channel = 4*c1_channels
+        self.pad_out_channel = pad_out_channel_factor*c1_channels
         self.upsample_f = upsample_factor
         self.dyn_ch = dyn_branch_ch
         self.mask_ch = mask_head_ch
