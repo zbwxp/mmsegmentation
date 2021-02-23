@@ -236,8 +236,10 @@ class EncoderDecoder(BaseSegmentor):
 
     def whole_inference(self, img, img_meta, rescale):
         """Inference with full image."""
-
         seg_logit = self.encode_decode(img, img_meta)
+        orig_h = img_meta[0]['img_shape'][0]
+        orig_w = img_meta[0]['img_shape'][1]
+        seg_logit = seg_logit[:, :, :orig_h, :orig_w]
         if rescale:
             if hasattr(self, 'use_aligned_bilinear') and self.use_aligned_bilinear:
                 target_h, target_w = img_meta[0]['ori_shape'][:2]
@@ -286,9 +288,9 @@ class EncoderDecoder(BaseSegmentor):
             flip_direction = img_meta[0]['flip_direction']
             assert flip_direction in ['horizontal', 'vertical']
             if flip_direction == 'horizontal':
-                output = output.flip(dims=(3, ))
+                output = output.flip(dims=(3,))
             elif flip_direction == 'vertical':
-                output = output.flip(dims=(2, ))
+                output = output.flip(dims=(2,))
 
         return output
 
