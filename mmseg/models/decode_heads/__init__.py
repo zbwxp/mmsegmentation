@@ -27,11 +27,13 @@ from .pad_fpn_head import PADFPNHead
 from .pad_sem_fpn_head import PADSEMFPNHead
 from .deeppad_2block_head import DeepPad2BlockHead
 from .deeppad_head_3x3 import DeepPadHead3x3
+from .deeppad_head512 import DeepPadHead512
 
 __all__ = [
     'FCNHead', 'PSPHead', 'ASPPHead', 'NLHead', 'GCHead', 'CCHead',
     'UPerHead', 'DepthwiseSeparableASPPHead', 'ANNHead', 'DAHead', 'OCRHead',
     'EncHead', 'DepthwiseSeparableFCNHead', 'FPNHead', 'EMAHead', 'DNLHead',
     'APCHead', 'DMHead', 'LRASPPHead', 'DynConvHead', 'DynPPMHead', 'DeepPadHead',
-    'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3'
+    'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3',
+    'DeepPadHead512'
 ]
