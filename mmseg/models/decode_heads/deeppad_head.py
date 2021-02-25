@@ -121,6 +121,10 @@ class DeepPadHead(ASPPHead):
                 act_cfg=self.act_cfg)
         else:
             self.c1_bottleneck = None
+
+        if self.interpolate_loss:
+            self.interpolate_loss_bottleneck = nn.Conv2d(self.pad_out_channel, self.num_classes, 1, padding=0, bias=False)
+            nn.init.kaiming_normal_(self.interpolate_loss_bottleneck.weight)
         self.sep_bottleneck = nn.Sequential(
             DepthwiseSeparableConvModule(
                 self.pad_out_channel + c1_channels,
@@ -181,7 +185,7 @@ class DeepPadHead(ASPPHead):
         if self.interpolate_loss:
             outputs = []
             outputs.append(output)
-            outputs.append(output_interpolate)
+            outputs.append(self.interpolate_loss_bottleneck(output_interpolate))
             return outputs
 
         if plot:
