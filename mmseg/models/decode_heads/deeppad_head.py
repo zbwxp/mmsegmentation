@@ -53,12 +53,12 @@ class DynHead(nn.Module):
             # ASPP(in_channels, aspp_dilate),
             ConvModule(
                 in_channels,
-                in_channels,
+                256,
                 3,
                 padding=1,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg, ),
-            nn.Conv2d(in_channels, num_out_channel, 1)
+            nn.Conv2d(256, num_out_channel, 1)
         )
 
         nn.init.kaiming_normal_(self.classifier[-1].weight)
@@ -158,11 +158,6 @@ class DeepPadHead(ASPPHead):
 
         if self.c1_bottleneck is not None:
             c1_output = self.c1_bottleneck(inputs[0])
-            # output = resize(
-            #     input=output,
-            #     size=c1_output.shape[2:],
-            #     mode='bilinear',
-            #     align_corners=self.align_corners)
             output = torch.cat([output, c1_output], dim=1)
         output = self.sep_bottleneck(output)
         output = self.out(output)
