@@ -8,7 +8,6 @@ from mmseg.ops import resize
 from ..builder import HEADS
 from .aspp_head import ASPPHead, ASPPModule
 
-
 class DepthwiseSeparableASPPModule(ASPPModule):
     """Atrous Spatial Pyramid Pooling (ASPP) Module with depthwise separable
     conv."""
@@ -85,6 +84,7 @@ class DeepPadHead(ASPPHead):
                  dyn_branch_ch,
                  mask_head_ch,
                  pad_out_channel_factor=4,
+                 interpolate_loss=False,
                  **kwargs):
         super(DeepPadHead, self).__init__(**kwargs)
         assert c1_in_channels >= 0
@@ -93,6 +93,7 @@ class DeepPadHead(ASPPHead):
         self.dyn_ch = dyn_branch_ch
         self.mask_ch = mask_head_ch
         self.use_low_level_info = False
+        self.interpolate_loss = interpolate_loss
         self.aspp_modules = DepthwiseSeparableASPPModule(
             dilations=self.dilations,
             in_channels=self.in_channels,
@@ -154,13 +155,44 @@ class DeepPadHead(ASPPHead):
         output = self.bottleneck(aspp_outs)
 
         output = self.classifier(output)
+        # output32 = self.interpolate_32(output)
         output = self.interpolate(output)
+        if self.interpolate_loss:
+            output_interpolate = output
+
+        plot = False
+        if plot:
+            output2 = output
+
+
 
         if self.c1_bottleneck is not None:
             c1_output = self.c1_bottleneck(inputs[0])
+            # c1_output = resize(
+            #     input=c1_output,
+            #     scale_factor=2,
+            #     mode='bilinear',
+            #     align_corners=self.align_corners)
+            # output3 = c1_output
             output = torch.cat([output, c1_output], dim=1)
         output = self.sep_bottleneck(output)
         output = self.out(output)
+
+        if self.interpolate_loss:
+            outputs = []
+            outputs.append(output)
+            outputs.append(output_interpolate)
+            return outputs
+
+        if plot:
+            outputs=[]
+            outputs.append(output)
+            outputs.append(output2)
+            # outputs.append(output3)
+            # outputs.append(output32)
+
+            return outputs
+
         return output
 
 
@@ -172,6 +204,29 @@ class DeepPadHead(ASPPHead):
         weights, biases = self.get_subnetworks_params(x, channels=dy_ch)
         f = self.upsample_f
         self.coord_generator(H, W)
+        coord = self.coord.reshape(1, H, W, 2, f, f).permute(0, 3, 1, 4, 2, 5).reshape(1, 2, H * f, W * f)
+        coord = coord.repeat(B, 1, 1, 1)
+        if x_cat is not None:
+            coord = torch.cat((coord, x_cat), 1)
+            coord = norm(coord)
+
+        B_coord, ch_coord, H_coord, W_coord = coord.size()
+        coord = coord.reshape(B_coord, ch_coord, H, f, W, f).permute(0, 2, 4, 1, 3, 5).reshape(1,
+                                                                                               B_coord * H * W * ch_coord,
+                                                                                               f, f)
+        output = self.subnetworks_forward(coord, weights, biases, B * H * W)
+        output = output.reshape(B, H, W, self.pad_out_channel, f, f).permute(0, 3, 1, 4, 2, 5)
+        output = output.reshape(B, self.pad_out_channel, H * f, W * f)
+        return output
+
+    def interpolate_32(self, x, x_cat=None, norm=None):
+        dy_ch = self.dyn_ch
+        B, conv_ch, H, W = x.size()
+        x = x.view(B, conv_ch, H * W).permute(0, 2, 1)
+        x = x.reshape(B * H * W, conv_ch)
+        weights, biases = self.get_subnetworks_params(x, channels=dy_ch)
+        f = self.upsample_f * 2
+        self.coord_generator(H, W, f)
         coord = self.coord.reshape(1, H, W, 2, f, f).permute(0, 3, 1, 4, 2, 5).reshape(1, 2, H * f, W * f)
         coord = coord.repeat(B, 1, 1, 1)
         if x_cat is not None:
@@ -226,8 +281,9 @@ class DeepPadHead(ASPPHead):
                 x = F.relu(x)
         return x
 
-    def coord_generator(self, height, width):
-        f = self.upsample_f
+    def coord_generator(self, height, width, f=None):
+        if f is None:
+            f = self.upsample_f
         coord = compute_locations_per_level(f, f)
         H = height
         W = width

@@ -6,5 +6,6 @@ model = dict(
         dyn_branch_ch=8,
         mask_head_ch=8,
         # pad_out_channel_factor=2,
+        interpolate_loss=True
     ),
 )
