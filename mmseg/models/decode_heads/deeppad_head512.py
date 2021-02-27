@@ -222,8 +222,8 @@ class DeepPadHead512(ASPPHead):
                 stride=1, padding=0,
                 groups=n_subnets
             )
-            # if i < n_layer - 1:
-            x = F.relu(x)
+            if i < n_layer - 1:
+                x = F.relu(x)
         return x
 
     def coord_generator(self, height, width):
