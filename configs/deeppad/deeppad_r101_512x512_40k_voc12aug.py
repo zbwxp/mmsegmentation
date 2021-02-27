@@ -8,8 +8,10 @@ model = dict(
     backbone=dict(depth=101),
     decode_head=dict(
             type='DeepPadHead512',
+            num_classes=21,
             dyn_branch_ch=8,
             mask_head_ch=8,
             pad_out_channel_factor=512/48,
         ),
+    auxiliary_head=dict(num_classes=21),
 )
