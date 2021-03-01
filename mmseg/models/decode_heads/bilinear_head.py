@@ -122,15 +122,15 @@ class BilinearHead(ASPPHead):
             self.c1_bottleneck = None
         self.sep_bottleneck = nn.Sequential(
             DepthwiseSeparableConvModule(
-                self.pad_out_channel + c1_channels,
-                self.pad_out_channel,
+                self.channels + c1_channels,
+                self.channels,
                 3,
                 padding=1,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg),
             DepthwiseSeparableConvModule(
-                self.pad_out_channel,
-                self.pad_out_channel,
+                self.channels,
+                self.channels,
                 3,
                 padding=1,
                 norm_cfg=self.norm_cfg,
@@ -155,6 +155,8 @@ class BilinearHead(ASPPHead):
 
         # output = self.classifier(output)
         # output = self.interpolate(output)
+        plot = False
+
 
         if self.c1_bottleneck is not None:
             c1_output = self.c1_bottleneck(inputs[0])
@@ -163,10 +165,19 @@ class BilinearHead(ASPPHead):
                         size=c1_output.size()[2:],
                         mode='bilinear',
                         align_corners=self.align_corners)
-
+            if plot:
+                output2 = output
+                output3 = c1_output
             output = torch.cat([output, c1_output], dim=1)
         output = self.sep_bottleneck(output)
         output = self.cls_seg(output)
+        if plot:
+            outputs=[]
+            outputs.append(output)
+            outputs.append(output2)
+            outputs.append(output3)
+            return outputs
+
         return output
 
 
