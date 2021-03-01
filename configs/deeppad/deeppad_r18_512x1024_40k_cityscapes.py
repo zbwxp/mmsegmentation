@@ -7,14 +7,12 @@ model = dict(
     pretrained='open-mmlab://resnet18_v1c',
     backbone=dict(depth=18),
     decode_head=dict(
-        type='DeepPadHead512',
         upsample_factor=8,
         dyn_branch_ch=8,
         mask_head_ch=8,
         c1_in_channels=64,
         c1_channels=12,
         in_channels=512,
-        channels=128,
-        pad_out_channel_factor=128/12,
+        channels=256,
     ),
     auxiliary_head=dict(in_channels=256, channels=64))
