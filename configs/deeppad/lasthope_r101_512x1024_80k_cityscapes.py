@@ -4,6 +4,7 @@ model = dict(
     backbone=dict(depth=101),
     decode_head=dict(
         type='LastHopeHead',
+        upsample_factor=32,
         dyn_branch_ch=8,
         mask_head_ch=8,
     ),
