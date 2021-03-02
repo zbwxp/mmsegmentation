@@ -190,6 +190,12 @@ class LastHopeHead(ASPPHead):
         # output = self.sep_bottleneck(output)
         # output = self.cls_seg(output)
         output = self.sep_bottleneck2(output)
+        if self.upsample_f != 8:
+            output = resize(
+                output,
+                scale_factor=self.upsample_f//8,
+                mode='bilinear',
+                align_corners=self.align_corners)
         dyn_filters = self.classifier(output_aspp)
         output = self.interpolate(dyn_filters, output, self.cat_norm)
         if plot:
