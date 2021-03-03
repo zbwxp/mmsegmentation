@@ -7,7 +7,7 @@ model = dict(
     pretrained='open-mmlab://resnet18_v1c',
     backbone=dict(depth=18),
     decode_head=dict(
-        type='LastHopeHead_v2',
+        type='LastHopeHead',
         upsample_factor=8,
         dyn_branch_ch=8,
         mask_head_ch=8,
