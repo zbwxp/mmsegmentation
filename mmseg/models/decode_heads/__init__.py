@@ -37,6 +37,8 @@ from .last_hope_refine import LastHopeHead_refine
 from .baseline_head import BaseHead
 from .baseline_aspp_head import BaseASPPHead
 from .basepadnet_head import BasePadHead
+from .baseASPPpadnet_head import BaseASPPPadHead
+
 
 
 __all__ = [
@@ -46,5 +48,6 @@ __all__ = [
     'APCHead', 'DMHead', 'LRASPPHead', 'DynConvHead', 'DynPPMHead', 'DeepPadHead',
     'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3',
     'DeepPadHead512', 'BilinearHead', 'LastHopeHead', 'LastHopeHead_v2', 'LastHopeHead_v3',
-    'LastHopeHead_tower', 'LastHopeHead_refine', 'BaseHead', 'BaseASPPHead', 'BasePadHead'
+    'LastHopeHead_tower', 'LastHopeHead_refine', 'BaseHead', 'BaseASPPHead', 'BasePadHead',
+    'BaseASPPPadHead'
 ]
