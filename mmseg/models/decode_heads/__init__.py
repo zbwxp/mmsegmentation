@@ -39,6 +39,7 @@ from .baseline_aspp_head import BaseASPPHead
 from .basepadnet_head import BasePadHead
 from .baseASPPpadnet_head import BaseASPPPadHead
 from .bilinear_pad_head import BilinearPADHead
+from .bilinear_pad_tower_head import BilinearPADTowerHead
 
 
 
@@ -50,5 +51,5 @@ __all__ = [
     'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3',
     'DeepPadHead512', 'BilinearHead', 'LastHopeHead', 'LastHopeHead_v2', 'LastHopeHead_v3',
     'LastHopeHead_tower', 'LastHopeHead_refine', 'BaseHead', 'BaseASPPHead', 'BasePadHead',
-    'BaseASPPPadHead', 'BilinearPADHead'
+    'BaseASPPPadHead', 'BilinearPADHead', 'BilinearPADTowerHead'
 ]
