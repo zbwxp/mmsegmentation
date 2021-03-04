@@ -33,6 +33,7 @@ from .last_hope import LastHopeHead
 from .last_hope_v2 import LastHopeHead_v2
 from .last_hope_v3 import LastHopeHead_v3
 from .last_hope_tower import LastHopeHead_tower
+from .last_hope_refine import LastHopeHead_refine
 
 __all__ = [
     'FCNHead', 'PSPHead', 'ASPPHead', 'NLHead', 'GCHead', 'CCHead',
@@ -41,5 +42,5 @@ __all__ = [
     'APCHead', 'DMHead', 'LRASPPHead', 'DynConvHead', 'DynPPMHead', 'DeepPadHead',
     'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3',
     'DeepPadHead512', 'BilinearHead', 'LastHopeHead', 'LastHopeHead_v2', 'LastHopeHead_v3',
-    'LastHopeHead_tower'
+    'LastHopeHead_tower', 'LastHopeHead_refine'
 ]
