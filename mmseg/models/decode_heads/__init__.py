@@ -43,6 +43,7 @@ from .bilinear_pad_tower_head import BilinearPADTowerHead
 from .bilinear_pad_head_v3 import BilinearPADHead_v3
 from .Torchseg_base import TorchsegBaseHead
 from .stage2_pad_head import Stage2PADHead
+from .stage2_pad_head_v3 import Stage2PADHead_v3
 
 
 __all__ = [
@@ -54,5 +55,5 @@ __all__ = [
     'DeepPadHead512', 'BilinearHead', 'LastHopeHead', 'LastHopeHead_v2', 'LastHopeHead_v3',
     'LastHopeHead_tower', 'LastHopeHead_refine', 'BaseHead', 'BaseASPPHead', 'BasePadHead',
     'BaseASPPPadHead', 'BilinearPADHead', 'BilinearPADTowerHead', 'BilinearPADHead_v3',
-    'TorchsegBaseHead', 'Stage2PADHead'
+    'TorchsegBaseHead', 'Stage2PADHead', 'Stage2PADHead_v3'
 ]
