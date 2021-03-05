@@ -93,6 +93,7 @@ class BaseHead(ASPPHead):
         self.dyn_ch = dyn_branch_ch
         self.mask_ch = mask_head_ch
         self.use_low_level_info = False
+        self.use_dropout = False
         # self.aspp_modules = DepthwiseSeparableASPPModule(
         #     dilations=self.dilations,
         #     in_channels=self.in_channels,
@@ -142,9 +143,9 @@ class BaseHead(ASPPHead):
                 conv_cfg=self.conv_cfg,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg)
-
-        # self.out = nn.Conv2d(self.pad_out_channel, self.num_classes, 1, padding=0, bias=False)
-        # nn.init.kaiming_normal_(self.out.weight)
+        if not self.use_dropout:
+            self.out = nn.Conv2d(self.channels, self.num_classes, 1, padding=0, bias=False)
+            nn.init.kaiming_normal_(self.out.weight)
 
     def forward(self, inputs):
         """Forward function."""
@@ -185,7 +186,10 @@ class BaseHead(ASPPHead):
             size=inputs[0].size()[2:],
             mode='bilinear',
             align_corners=self.align_corners)
-        output = self.cls_seg(output)
+        if self.use_dropout:
+            output = self.cls_seg(output)
+        else:
+            output = self.out(output)
         if plot:
             outputs=[]
             outputs.append(output)
