@@ -23,9 +23,5 @@ model = dict(
         # pad_out_channel_factor=128/12,
         sampler=dict(type='OHEMPixelSampler', thresh=0.7, min_kept=100000)
     ),
-    auxiliary_head=dict(
-        in_channels=256,
-        channels=64,
-        norm_cfg=norm_cfg,
-    )
+    auxiliary_head=None
 )
