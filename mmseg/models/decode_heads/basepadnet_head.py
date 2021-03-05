@@ -101,7 +101,7 @@ class BasePadHead(ASPPHead):
         #     norm_cfg=self.norm_cfg,
         #     act_cfg=self.act_cfg)
 
-        last_stage_ch = self.channels
+        last_stage_ch = self.in_channels
         self.classifier = DynHead(last_stage_ch,
                                   self.pad_out_channel,
                                   self.norm_cfg,
@@ -135,13 +135,13 @@ class BasePadHead(ASPPHead):
         #         padding=1,
         #         norm_cfg=self.norm_cfg,
         #         act_cfg=self.act_cfg))
-        self.sep_bottleneck2 = ConvModule(
-                self.in_channels,
-                self.channels,
-                1,
-                conv_cfg=self.conv_cfg,
-                norm_cfg=self.norm_cfg,
-                act_cfg=self.act_cfg)
+        # self.sep_bottleneck2 = ConvModule(
+        #         self.in_channels,
+        #         self.channels,
+        #         1,
+        #         conv_cfg=self.conv_cfg,
+        #         norm_cfg=self.norm_cfg,
+        #         act_cfg=self.act_cfg)
 
         # self.out = nn.Conv2d(self.pad_out_channel, self.num_classes, 1, padding=0, bias=False)
         # nn.init.kaiming_normal_(self.out.weight)
@@ -178,7 +178,7 @@ class BasePadHead(ASPPHead):
                 output3 = c1_output
             output = torch.cat([output, c1_output], dim=1)
         # output = self.sep_bottleneck(output)
-        output = self.sep_bottleneck2(output)
+        # output = self.sep_bottleneck2(output)
         output = self.classifier(output)
         output = self.interpolate(output)
         # output = resize(
