@@ -41,7 +41,7 @@ from .baseASPPpadnet_head import BaseASPPPadHead
 from .bilinear_pad_head import BilinearPADHead
 from .bilinear_pad_tower_head import BilinearPADTowerHead
 from .bilinear_pad_head_v3 import BilinearPADHead_v3
-
+from .Torchseg_base import TorchsegBaseHead
 
 
 __all__ = [
@@ -52,5 +52,6 @@ __all__ = [
     'DynASPPHead', 'PADFPNHead', 'PADSEMFPNHead', 'DeepPad2BlockHead', 'DeepPadHead3x3',
     'DeepPadHead512', 'BilinearHead', 'LastHopeHead', 'LastHopeHead_v2', 'LastHopeHead_v3',
     'LastHopeHead_tower', 'LastHopeHead_refine', 'BaseHead', 'BaseASPPHead', 'BasePadHead',
-    'BaseASPPPadHead', 'BilinearPADHead', 'BilinearPADTowerHead', 'BilinearPADHead_v3'
+    'BaseASPPPadHead', 'BilinearPADHead', 'BilinearPADTowerHead', 'BilinearPADHead_v3',
+    'TorchsegBaseHead'
 ]
