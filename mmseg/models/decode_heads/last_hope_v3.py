@@ -140,14 +140,22 @@ class LastHopeHead_v3(ASPPHead):
         #         norm_cfg=self.norm_cfg,
         #         act_cfg=self.act_cfg))
 
-        self.sep_bottleneck2 = ConvModule(
-            self.channels + c1_channels,
-            self.mask_ch,
-            3,
-            padding=1,
-            conv_cfg=self.conv_cfg,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg)
+        self.sep_bottleneck2 = nn.Sequential(
+            DepthwiseSeparableConvModule(
+                self.channels + c1_channels,
+                self.channels//2,
+                3,
+                padding=1,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg),
+            DepthwiseSeparableConvModule(
+                self.channels//2,
+                self.mask_ch,
+                3,
+                padding=1,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
+        )
 
         _, norm = build_norm_layer(self.norm_cfg, self.dyn_ch + self.mask_ch)
         self.add_module("cat_norm", norm)
