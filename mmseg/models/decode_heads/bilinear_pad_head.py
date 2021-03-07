@@ -54,12 +54,12 @@ class DynHead(nn.Module):
             # ASPP(in_channels, aspp_dilate),
             ConvModule(
                 in_channels,
-                256,
+                in_channels//2,
                 3,
                 padding=1,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg, ),
-            nn.Conv2d(256, num_out_channel, 1)
+            nn.Conv2d(in_channels//2, num_out_channel, 1)
         )
 
         nn.init.kaiming_normal_(self.classifier[-1].weight)
@@ -115,7 +115,7 @@ class BilinearPADHead(ASPPHead):
         if c1_in_channels > 0:
             self.c1_bottleneck = ConvModule(
                 c1_in_channels,
-                c1_channels,
+                self.mask_ch,
                 1,
                 conv_cfg=self.conv_cfg,
                 norm_cfg=self.norm_cfg,
