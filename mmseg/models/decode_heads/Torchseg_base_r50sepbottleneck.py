@@ -123,7 +123,7 @@ class TorchsegBaseHead_r50sepbottleneck(ASPPHead):
         #     self.c1_bottleneck = None
         self.sep_bottleneck = nn.Sequential(
             DepthwiseSeparableConvModule(
-                self.channels,
+                self.in_channels,
                 self.channels,
                 3,
                 padding=1,
