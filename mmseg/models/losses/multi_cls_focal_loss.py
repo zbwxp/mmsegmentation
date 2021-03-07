@@ -204,8 +204,9 @@ class MultiClsFocalLoss(nn.Module):
 
         loss_cls = ce_loss * ((1 - pt) ** self.gamma)
         if reduction == 'mean':
-            loss_cls = loss_cls.mean()
-
+            num = (label != kwargs['ignore_index']).sum()
+            loss_cls = loss_cls.sum() / num
+            # loss_cls = loss_cls.mean()
         # if self.alpha >= 0:
         #     loss_cls = loss_cls * self.alpha
 
