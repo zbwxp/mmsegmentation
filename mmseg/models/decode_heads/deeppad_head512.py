@@ -153,14 +153,32 @@ class DeepPadHead512(ASPPHead):
         aspp_outs = torch.cat(aspp_outs, dim=1)
         output = self.bottleneck(aspp_outs)
 
+        plot = False
         output = self.classifier(output)
+        if plot:
+            output32 = self.interpolate_32(output)
         output = self.interpolate(output)
+
+        if plot:
+            output2 = output
 
         if self.c1_bottleneck is not None:
             c1_output = self.c1_bottleneck(inputs[0])
+            if plot:
+                output3 = c1_output
             output = torch.cat([output, c1_output], dim=1)
         output = self.sep_bottleneck(output)
         output = self.cls_seg(output)
+
+        if plot:
+            outputs=[]
+            outputs.append(output)
+            outputs.append(output2)
+            outputs.append(output3)
+            outputs.append(output32)
+
+            return outputs
+
         return output
 
 
@@ -172,6 +190,30 @@ class DeepPadHead512(ASPPHead):
         weights, biases = self.get_subnetworks_params(x, channels=dy_ch)
         f = self.upsample_f
         self.coord_generator(H, W)
+        coord = self.coord.reshape(1, H, W, 2, f, f).permute(0, 3, 1, 4, 2, 5).reshape(1, 2, H * f, W * f)
+        coord = coord.repeat(B, 1, 1, 1)
+        if x_cat is not None:
+            coord = torch.cat((coord, x_cat), 1)
+            coord = norm(coord)
+
+        B_coord, ch_coord, H_coord, W_coord = coord.size()
+        coord = coord.reshape(B_coord, ch_coord, H, f, W, f).permute(0, 2, 4, 1, 3, 5).reshape(1,
+                                                                                               B_coord * H * W * ch_coord,
+                                                                                               f, f)
+        output = self.subnetworks_forward(coord, weights, biases, B * H * W)
+        output = output.reshape(B, H, W, self.pad_out_channel, f, f).permute(0, 3, 1, 4, 2, 5)
+        output = output.reshape(B, self.pad_out_channel, H * f, W * f)
+        return output
+
+
+    def interpolate_32(self, x, x_cat=None, norm=None):
+        dy_ch = self.dyn_ch
+        B, conv_ch, H, W = x.size()
+        x = x.view(B, conv_ch, H * W).permute(0, 2, 1)
+        x = x.reshape(B * H * W, conv_ch)
+        weights, biases = self.get_subnetworks_params(x, channels=dy_ch)
+        f = self.upsample_f * 2
+        self.coord_generator32(H, W, f)
         coord = self.coord.reshape(1, H, W, 2, f, f).permute(0, 3, 1, 4, 2, 5).reshape(1, 2, H * f, W * f)
         coord = coord.repeat(B, 1, 1, 1)
         if x_cat is not None:
@@ -228,6 +270,15 @@ class DeepPadHead512(ASPPHead):
 
     def coord_generator(self, height, width):
         f = self.upsample_f
+        coord = compute_locations_per_level(f, f)
+        H = height
+        W = width
+        coord = coord.repeat(H * W, 1, 1, 1)
+        self.coord = coord.to(device='cuda')
+
+    def coord_generator32(self, height, width, f=None):
+        if f is None:
+            f = self.upsample_f
         coord = compute_locations_per_level(f, f)
         H = height
         W = width
