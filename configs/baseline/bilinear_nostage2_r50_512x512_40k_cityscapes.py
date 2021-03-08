@@ -19,6 +19,5 @@ model = dict(
         # channels=128,
         # pad_out_channel_factor=128/12,
     ),
-    auxiliary_head=dict(
-        norm_cfg=norm_cfg,)
+    auxiliary_head=None
 )
