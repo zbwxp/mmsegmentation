@@ -174,6 +174,12 @@ class BilinearPADHead(ASPPHead):
             if plot:
                 output2 = output
                 output3 = c1_output
+        if self.upsample_f != 8:
+            c1_output = resize(
+                        c1_output,
+                        scale_factor=self.upsample_f // 8,
+                        mode='bilinear',
+                        align_corners=self.align_corners)
         output = self.classifier(output)
         output = self.interpolate(output, c1_output, self.cat_norm)
             # output = torch.cat([output, c1_output], dim=1)
