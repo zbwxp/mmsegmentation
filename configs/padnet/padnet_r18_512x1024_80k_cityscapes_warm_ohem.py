@@ -2,7 +2,7 @@ _base_ = [
     '../_base_/models/padnet_r50.py', '../_base_/datasets/cityscapes.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_80k_warmup.py'
 ]
-norm_cfg = dict(type='BN', requires_grad=True)
+norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     pretrained='open-mmlab://resnet18_v1c',
     use_aligned_bilinear=True,
