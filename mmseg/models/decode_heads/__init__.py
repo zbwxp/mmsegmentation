@@ -51,6 +51,7 @@ from .bilinear_head_noASPP import BilinearHead_noASPP
 # from .stage2_ASPP_pad_head_r50 import Stage2PADHeadASPP_r50
 from .stage2_pad_head_r50_gp import Stage2PADHead_r50_GP
 from .stage2_pad_head_r50_gp_enhance import Stage2PADHead_r50_GPEnhance
+from .stage2_pad_head_r50_fast import Stage2PADHead_r50_fast
 
 __all__ = [
     'FCNHead', 'PSPHead', 'ASPPHead', 'NLHead', 'GCHead', 'CCHead',
@@ -63,5 +64,5 @@ __all__ = [
     'BaseASPPPadHead', 'BilinearPADHead', 'BilinearPADTowerHead', 'BilinearPADHead_v3',
     'TorchsegBaseHead', 'Stage2PADHead', 'Stage2PADHead_v3', 'TorchsegBaseHead_r50',
     'TorchsegBaseHead_r50sepbottleneck', 'stage2_pad_head_r50', 'BilinearHead_noASPP',
-    'Stage2PADHead_r50_GP', 'Stage2PADHead_r50_GPEnhance'
+    'Stage2PADHead_r50_GP', 'Stage2PADHead_r50_GPEnhance', 'Stage2PADHead_r50_fast'
 ]
