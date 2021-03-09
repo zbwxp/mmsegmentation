@@ -48,7 +48,7 @@ from .Torchseg_base_r50 import TorchsegBaseHead_r50
 from .Torchseg_base_r50sepbottleneck import TorchsegBaseHead_r50sepbottleneck
 from .stage2_pad_head_r50 import Stage2PADHead_r50
 from .bilinear_head_noASPP import BilinearHead_noASPP
-from .stage2_ASPP_pad_head_r50 import Stage2PADHeadASPP_r50
+# from .stage2_ASPP_pad_head_r50 import Stage2PADHeadASPP_r50
 from .stage2_pad_head_r50_gp import Stage2PADHead_r50_GP
 from .stage2_pad_head_r50_gp_enhance import Stage2PADHead_r50_GPEnhance
 
