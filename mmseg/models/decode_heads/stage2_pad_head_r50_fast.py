@@ -243,7 +243,7 @@ class Stage2PADHead_r50_fast(ASPPHead):
             coord = torch.cat((coord, x_cat), 1)
             coord = norm(coord)
 
-        B_coord, ch_coord, H_coord, W_coord = coord.size()
+        # B_coord, ch_coord, H_coord, W_coord = coord.size()
         # coord = coord.reshape(B_coord, ch_coord, H, f, W, f).permute(0, 2, 4, 1, 3, 5).reshape(1,
         #                                                                                        B_coord * H * W * ch_coord,
         #                                                                                        f, f)
