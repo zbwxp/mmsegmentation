@@ -246,8 +246,8 @@ class BilinearPADHead_fast(ASPPHead):
         #                                                                                        B_coord * H * W * ch_coord,
         #                                                                                        f, f)
         output = self.subnetworks_forward_fast(coord, weights, biases, B * H * W)
-        output = output.reshape(B, H, W, self.pad_out_channel, f, f).permute(0, 3, 1, 4, 2, 5)
-        output = output.reshape(B, self.pad_out_channel, H * f, W * f)
+        # output = output.reshape(B, H, W, self.pad_out_channel, f, f).permute(0, 3, 1, 4, 2, 5)
+        # output = output.reshape(B, self.pad_out_channel, H * f, W * f)
         return output
 
     def get_subnetworks_params(self, attns, num_bases=0, channels=16):
