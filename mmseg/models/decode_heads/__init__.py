@@ -55,6 +55,8 @@ from .stage2_pad_head_r50_fast import Stage2PADHead_r50_fast
 from .stage2_pad_head_r50_dr1 import Stage2PADHead_r50_dr1
 from .stage2_pad_head_r50_gp_fast import Stage2PADHead_r50_GP_fast
 from .bilinear_pad_head_fast import BilinearPADHead_fast
+from .bilinear_pad_head_fast_no_bottle import BilinearPADHead_fast_no_bottle
+
 
 
 __all__ = [
@@ -69,5 +71,6 @@ __all__ = [
     'TorchsegBaseHead', 'Stage2PADHead', 'Stage2PADHead_v3', 'TorchsegBaseHead_r50',
     'TorchsegBaseHead_r50sepbottleneck', 'Stage2PADHead_r50', 'BilinearHead_noASPP',
     'Stage2PADHead_r50_GP', 'Stage2PADHead_r50_GPEnhance', 'Stage2PADHead_r50_fast',
-    'Stage2PADHead_r50_dr1', 'Stage2PADHead_r50_GP_fast', 'BilinearPADHead_fast'
+    'Stage2PADHead_r50_dr1', 'Stage2PADHead_r50_GP_fast', 'BilinearPADHead_fast',
+    'BilinearPADHead_fast_no_bottle'
 ]
