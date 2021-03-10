@@ -57,7 +57,7 @@ from .stage2_pad_head_r50_gp_fast import Stage2PADHead_r50_GP_fast
 from .bilinear_pad_head_fast import BilinearPADHead_fast
 from .bilinear_pad_head_fast_no_bottle import BilinearPADHead_fast_no_bottle
 from .last_hope_fast import LastHopeHead_fast
-
+from .dyn_conv_head_fast import DynConvHead_fast
 
 
 __all__ = [
@@ -73,5 +73,5 @@ __all__ = [
     'TorchsegBaseHead_r50sepbottleneck', 'Stage2PADHead_r50', 'BilinearHead_noASPP',
     'Stage2PADHead_r50_GP', 'Stage2PADHead_r50_GPEnhance', 'Stage2PADHead_r50_fast',
     'Stage2PADHead_r50_dr1', 'Stage2PADHead_r50_GP_fast', 'BilinearPADHead_fast',
-    'BilinearPADHead_fast_no_bottle', 'LastHopeHead_fast'
+    'BilinearPADHead_fast_no_bottle', 'LastHopeHead_fast', 'DynConvHead_fast'
 ]
