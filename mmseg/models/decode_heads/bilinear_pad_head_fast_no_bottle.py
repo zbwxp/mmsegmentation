@@ -53,13 +53,13 @@ class DynHead(nn.Module):
 
         self.classifier = nn.Sequential(
             # ASPP(in_channels, aspp_dilate),
-            ConvModule(
+            DepthwiseSeparableConvModule(
                 in_channels * 5,
                 in_channels * 5 // 2,
                 3,
                 padding=1,
                 norm_cfg=norm_cfg,
-                act_cfg=act_cfg, ),
+                act_cfg=act_cfg),
             nn.Conv2d(in_channels * 5 // 2, num_out_channel, 1)
         )
 
