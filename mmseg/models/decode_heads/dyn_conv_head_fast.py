@@ -9,7 +9,7 @@ from mmseg.ops import resize, aligned_bilinear
 from ..builder import HEADS
 from .aspp_head import ASPPHead, ASPPModule
 from .decode_head import BaseDecodeHead
-
+from .compute_locations import compute_locations_per_level
 
 class DynHead(nn.Module):
     def __init__(self,
@@ -353,15 +353,15 @@ class DynConvHead_fast(BaseDecodeHead):
         self.coord = coord.to(device='cuda')
 
 
-def compute_locations_per_level(h, w):
-    shifts_x = torch.arange(
-        0, 1, step=1 / w,
-        dtype=torch.float32
-    )
-    shifts_y = torch.arange(
-        0, 1, step=1 / h,
-        dtype=torch.float32
-    )
-    shift_y, shift_x = torch.meshgrid(shifts_y, shifts_x)
-    locations = torch.stack((shift_x, shift_y), dim=0)
-    return locations
+# def compute_locations_per_level(h, w):
+#     shifts_x = torch.arange(
+#         0, 1, step=1 / w,
+#         dtype=torch.float32
+#     )
+#     shifts_y = torch.arange(
+#         0, 1, step=1 / h,
+#         dtype=torch.float32
+#     )
+#     shift_y, shift_x = torch.meshgrid(shifts_y, shifts_x)
+#     locations = torch.stack((shift_x, shift_y), dim=0)
+#     return locations
