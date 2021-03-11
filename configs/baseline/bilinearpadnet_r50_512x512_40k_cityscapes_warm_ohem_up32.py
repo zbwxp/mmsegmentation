@@ -10,9 +10,9 @@ model = dict(
     ),
     decode_head=dict(
         type='BilinearPADHead_fast',
-        upsample_factor=16,
-        dyn_branch_ch=8,
-        mask_head_ch=8,
+        upsample_factor=32,
+        dyn_branch_ch=16,
+        mask_head_ch=32,
         # c1_in_channels=64,
         # c1_channels=12,
         # in_channels=512,
