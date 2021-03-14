@@ -26,7 +26,11 @@ def resize(input,
                         f'out size {(output_h, output_w)} is `nx+1`')
     if isinstance(size, torch.Size):
         size = tuple(int(x) for x in size)
-    return F.interpolate(input, size, scale_factor, mode, align_corners)
+    input = input.cpu()
+    result = F.interpolate(input, size, scale_factor, mode, align_corners)
+    return result.cuda()
+
+
 
 def aligned_bilinear(tensor, factor):
     assert tensor.dim() == 4
