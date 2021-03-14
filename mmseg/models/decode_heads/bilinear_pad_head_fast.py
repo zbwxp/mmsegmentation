@@ -161,6 +161,7 @@ class BilinearPADHead_fast(ASPPHead):
     def forward(self, inputs):
         """Forward function."""
         x = self._transform_inputs(inputs)
+        print("input:",x)
         aspp_outs = [
             resize(
                 self.image_pool(x),
@@ -202,6 +203,7 @@ class BilinearPADHead_fast(ASPPHead):
             outputs.append(output3)
             return outputs
 
+        print("output:", output)
         return output
 
     def interpolate(self, x, x_cat=None, norm=None):
