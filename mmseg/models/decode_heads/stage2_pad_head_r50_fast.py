@@ -8,7 +8,7 @@ from mmcv.cnn.bricks import build_norm_layer
 from mmseg.ops import resize
 from ..builder import HEADS
 from .aspp_head import ASPPHead, ASPPModule
-
+from .compute_locations import compute_locations_per_level
 
 class DepthwiseSeparableASPPModule(ASPPModule):
     """Atrous Spatial Pyramid Pooling (ASPP) Module with depthwise separable
@@ -37,7 +37,8 @@ class DynHead(nn.Module):
                  upsample_f,
                  dyn_ch,
                  mask_ch,
-                 use_low_level_info=False):
+                 use_low_level_info=False,
+                 head_reduction_factor=2):
         super(DynHead, self).__init__()
 
         channels = dyn_ch
@@ -55,12 +56,12 @@ class DynHead(nn.Module):
             # ASPP(in_channels, aspp_dilate),
             ConvModule(
                 in_channels,
-                in_channels // 2,
+                in_channels // head_reduction_factor,
                 3,
                 padding=1,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg, ),
-            nn.Conv2d(in_channels // 2, num_out_channel, 1)
+            nn.Conv2d(in_channels // head_reduction_factor, num_out_channel, 1)
         )
 
         nn.init.kaiming_normal_(self.classifier[-1].weight)
@@ -87,6 +88,7 @@ class Stage2PADHead_r50_fast(ASPPHead):
                  upsample_factor,
                  dyn_branch_ch,
                  mask_head_ch,
+                 classifier_reduction_factor=2,
                  pad_out_channel_factor=4,
                  **kwargs):
         super(Stage2PADHead_r50_fast, self).__init__(**kwargs)
@@ -96,6 +98,7 @@ class Stage2PADHead_r50_fast(ASPPHead):
         self.dyn_ch = dyn_branch_ch
         self.mask_ch = mask_head_ch
         self.use_low_level_info = True
+        self.classifier_reduction_factor = classifier_reduction_factor
         # self.aspp_modules = DepthwiseSeparableASPPModule(
         #     dilations=self.dilations,
         #     in_channels=self.in_channels,
@@ -112,7 +115,8 @@ class Stage2PADHead_r50_fast(ASPPHead):
                                   self.upsample_f,
                                   self.dyn_ch,
                                   self.mask_ch,
-                                  self.use_low_level_info)
+                                  self.use_low_level_info,
+                                  self.classifier_reduction_factor)
 
         if c1_in_channels > 0:
             self.c1_bottleneck = nn.Sequential(
@@ -354,15 +358,15 @@ class Stage2PADHead_r50_fast(ASPPHead):
         self.coord = coord.to(device='cuda')
 
 
-def compute_locations_per_level(h, w):
-    shifts_x = torch.arange(
-        0, 1, step=1 / w,
-        dtype=torch.float32
-    )
-    shifts_y = torch.arange(
-        0, 1, step=1 / h,
-        dtype=torch.float32
-    )
-    shift_y, shift_x = torch.meshgrid(shifts_y, shifts_x)
-    locations = torch.stack((shift_x, shift_y), dim=0)
-    return locations
+# def compute_locations_per_level(h, w):
+#     shifts_x = torch.arange(
+#         0, 1, step=1 / w,
+#         dtype=torch.float32
+#     )
+#     shifts_y = torch.arange(
+#         0, 1, step=1 / h,
+#         dtype=torch.float32
+#     )
+#     shift_y, shift_x = torch.meshgrid(shifts_y, shifts_x)
+#     locations = torch.stack((shift_x, shift_y), dim=0)
+#     return locations
